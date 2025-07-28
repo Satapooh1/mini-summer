@@ -1,23 +1,70 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-    <title>Todo App</title>
+    <meta charset="UTF-8">
+    <title>Secure Todo App</title>
+    <link href="https://fonts.googleapis.com/css2?family=Roboto:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        body { font-family: 'Roboto', sans-serif; background: #f8fafc; margin: 0; padding: 0;}
+        .container { max-width: 500px; margin: 48px auto; background: #fff; padding: 32px 24px 20px; border-radius: 10px; box-shadow: 0 6px 20px rgba(20,30,60,.13);}
+        h1 { text-align: center; margin-bottom: 18px; color: #235a97; }
+        form { display: flex; justify-content: center; gap: 8px; margin-bottom: 18px; }
+        input[type="text"], input[type="password"] { flex: 1; padding: 8px; border-radius: 6px; border: 1px solid #bbb; }
+        button { background: #235a97; color: #fff; border: none; padding: 8px 20px; border-radius: 6px; cursor: pointer; transition: 0.1s; }
+        button:hover { background: #17406c;}
+        .todo-list { list-style: none; padding: 0;}
+        .todo-list li { background: #f1f5fa; margin: 7px 0; border-radius: 6px; padding: 8px 14px; display: flex; align-items: center; justify-content: space-between; }
+        .owner-tag { font-size: 12px; padding: 2px 7px; border-radius: 10px; background: #cfe4ff; color: #17406c; margin-left: 10px;}
+        .delete-btn { background: #e95252; color: #fff; border: none; border-radius: 6px; padding: 4px 10px; font-size: 12px; cursor: pointer;}
+        .delete-btn:hover { background: #ad3131;}
+        .auth-bar { text-align: right; margin-bottom: 15px;}
+        .auth-bar form, .auth-bar span { display: inline;}
+        @media (max-width: 600px) { .container { padding: 18px 5px 10px; } }
+    </style>
 </head>
 <body>
-    <h1>Simple Todo App</h1>
+<div class="container">
+    <h1>🔒 Secure Todo List</h1>
+    <div class="auth-bar">
+        {% if username %}
+            <span>👤 {{ username }} | <a href="/logout">Logout</a></span>
+        {% else %}
+            <form method="post" action="/login" style="display:inline;">
+                <input type="text" name="username" placeholder="Username" required>
+                <button type="submit">Login</button>
+            </form>
+        {% endif %}
+    </div>
 
+    {% if username %}
     <form action="/create-todo" method="post">
-        <input type="text" name="item" placeholder="Enter a new todo" required>
+        <input type="text" name="item" placeholder="New todo..." required>
         <button type="submit">Add</button>
     </form>
+    {% else %}
+        <div style="text-align:center;color:#888;margin-bottom:12px;">
+            <em>กรุณา Login ก่อนเพิ่มหรือจัดการ Todo</em>
+        </div>
+    {% endif %}
 
-    <h2>Todo List:</h2>
-    <ul>
+    <h2>Todo List</h2>
+    <ul class="todo-list">
         {% for todo in todos %}
-            <li>{{ todo }}</li>
+            <li>
+                <div>
+                    {{ todo.item }}
+                    <span class="owner-tag">{{ todo.owner }}</span>
+                </div>
+                {% if username and todo.owner == username %}
+                    <form action="/delete-todo/{{ loop.index0 }}" method="post" style="margin:0;display:inline;">
+                        <button class="delete-btn" type="submit">Delete</button>
+                    </form>
+                {% endif %}
+            </li>
         {% else %}
-            <li>No todos yet!</li>
+            <li style="text-align:center;color:#bbb;">No todos yet!</li>
         {% endfor %}
     </ul>
+</div>
 </body>
 </html>
